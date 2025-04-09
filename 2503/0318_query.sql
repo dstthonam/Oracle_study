@@ -57,6 +57,13 @@ SELECT NVL2(E.COMM, 'O', 'X') AS EXIST_COMM,
     GROUP BY NVL2(E.COMM, 'O', 'X')
     ;
 
+SELECT NVL(5, '1'),
+        NVL(NULL, '2'),
+        NVL2(NULL, '3', 'A'),
+        NVL2(10, '4', 'B'),
+        NVL2(NULL, '5', '')
+    FROM DUAL;
+
 SELECT E.DEPTNO, 
         TO_CHAR(E.HIREDATE, 'YYYY') AS HIRE_YEAR,
         COUNT(*) AS CNT,

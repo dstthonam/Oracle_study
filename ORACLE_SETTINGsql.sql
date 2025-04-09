@@ -13,7 +13,12 @@ SQL*PLUS COMMAND
 (CONNECT/DISCONNECT) {ID}/{PW};
 -- SQL*PLUS 중지
 EXIT/QUIT;
-/
+
+-- SESSION 조회
+SELECT * FROM V$SESSION WHERE SCHEMANAME = 'SCOTT';
+-- SESSION KILLED
+ALTER SYSTEM KILL SESSION {'SID,SERIAL#'}; -- SID와 SERIAL# 컬럼의 값을 입력, ''도 입력해야함.
+
 
 /**
 
@@ -65,15 +70,26 @@ USER 관련
 
 */
 --USER 생성
-CREATE USER (USERNAME) IDENTIFIED BY (PASSWORD);
+CREATE USER {USERNAME} IDENTIFIED BY {PASSWORD};
+
+CREATE USER USER_NAME IDENTIFIED BY PASSWORD
+DEFAULT TABLESPACE TABLESPACE_NAME                -- 기본 TABLESPACE 지정
+TEMPORARY TABLESPACE TEMP_TABLESPACE_NAME         -- 임시적으로 DATA를 저장할 TABLESPACE 지정
+QUOTA TABLESPACE_SIZE ON TABLESPACE_NAME          -- 해당 USER가 TABLESAPCE에서 사용할 용량 이정
+PROFILE PROFILE_NAME                              -- PROFILE 추가 설정
+PASSWORD EXPIRE                                   -- USER가 접속했을 때 PASSWORD변경 여부 설정(강제 변경)
+ACCOUNT LOCK/UNLOCK;
 
 -- PASSWORD 변경
-ALTER USER (USERNAME) IDENTIFIED BY (PASSWORD);
+ALTER USER {USERNAME} IDENTIFIED BY {PASSWORD};
 
 /**
 USER 권한 부여
 
 (권한 종류                                                     - 설명)
+{CONNECT}                                                     - ALTER/CREATE SESSION
+{RESOURCE}                                                    - CERATE CLUSTER, INDEXTYPE, OPERATOR, PROCEDURE, SEQUENCE, TABLE, TRIGGER, TYPE 권한 부여
+
 {CREATE/ALTER/RESTRICTED/DROP/ALL} SESSION                    - DB 접속 권한
 {CREATE/DROP/ALL} USER                                        - DB USER 생성/삭제 권한
 {SYSDBA/SYSOPER}                                              - DB 관리하는 (최고/) 권한
@@ -97,7 +113,6 @@ READ, WRITE ON DIRECTORY {DIRECTORY_NAME}                     - DIRECTORY 읽기
 ~~{TO/FROM} PUBLIC                                            - 모든 사용자에게 권한 부여
 */
 GRANT {GRANT TO ORDER} TO {USERNAME};
-
 -- USER 권한 회수
 REVOKE {GRANT TO ORDER} FROM {USERNAME};
 
@@ -234,3 +249,58 @@ TNS(Transparent Network Substrate) 설정
 SELECT FILE_NAME, TABLESPACE_NAME, BYTES/1024/1024 AS SIZE_MB FROM DBA_DATA_FILES;
 
 select * from dba_sys_privs where grantee='사용자명';
+
+
+SELECT * FROM USER_SOURCE;
+
+SELECT TEXT FROM USER_SOURCE;
+
+DROP PROCEDURE PRO_NOPARAM;
+
+SHOW ERRORS;
+
+SHOW ERR PROCEDURE PRO_NOPARAM;
+
+SELECT *
+    FROM USER_ERRORS
+    WHERE NAME = 'PRO_ERR'
+    ;
+
+
+SELECT REGEXP_REPLACE(LOC_DATE3, '([[:digit:]]{4})(\d{2})(\d{2})', '\1-\2-\3') AS POST_DATE FROM TEST_DATE;
+
+SELECT ST_ASTEXT('09UE012')
+    FROM DUAL;
+
+SELECT * FROM USER_LIBRARIES;
+
+
+SELECT REGEXP_REPLACE(LOC_DATE3, '([[:digit:]]{4})(\d{2})(\d{2})', '\1-\2-\3') AS POST_DATE FROM TEST_DATE;
+
+INSERT INTO TEST_DATE VALUES ('20150201', 20150304, TO_DATE('2015-04-19', 'YYYY-MM-DD'));
+
+SELECT ST_ASTEXT('09UE012')
+    FROM DUAL;
+
+SELECT * FROM USER_LIBRARIES;
+
+
+select * from user_mviews;
+select * from v$controlfile;
+select * from v$parameter --where name='control_files'
+;
+
+SELECT * FROM V$SESSION WHERE SCHEMANAME = 'SCOTT';
+
+SELECT * FROM USER_OBJECTS;
+
+MERGE INTO EMP_TEMP T
+    USING EMP E ON (T.EMPNO = E.EMPNO)
+    WHEN MATCHED THEN 
+        UPDATE SET T.SAL = 4000
+        WHERE E.DEPTNO = 20
+        ;
+
+
+
+        

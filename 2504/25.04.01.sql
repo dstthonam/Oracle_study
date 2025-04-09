@@ -1,0 +1,78 @@
+DECLARE
+    V_NUMBER NUMBER := 13;
+BEGIN
+    IF MOD(V_NUMBER, 2) = 1 THEN
+        DBMS_OUTPUT.PUT_LINE('V_NUMBER는 홀수입니다!');
+    END IF;
+END;
+/
+
+DECLARE
+    V_NUMBER NUMBER := 14;
+BEGIN
+    IF MOD(V_NUMBER, 2) = 1 THEN
+        DBMS_OUTPUT.PUT_LINE('V_NUMBER는 홀수입니다!');
+    ELSE    
+        DBMS_OUTPUT.PUT_LINE('V_NUMBER는 짝수입니다!');
+    END IF;
+END;
+/
+
+DECLARE
+    V_SCORE NUMBER := 87;
+BEGIN
+    CASE TRUNC(V_SCORE/10)
+        WHEN 10 THEN DBMS_OUTPUT.PUT_LINE('A학점');
+        WHEN 9 THEN DBMS_OUTPUT.PUT_LINE('A학점');
+        WHEN 8 THEN DBMS_OUTPUT.PUT_LINE('B학점');
+        WHEN 7 THEN DBMS_OUTPUT.PUT_LINE('C학점');
+        WHEN 6 THEN DBMS_OUTPUT.PUT_LINE('D학점');
+        ELSE DBMS_OUTPUT.PUT_LINE('F학점');
+    END CASE;
+END;
+/
+
+DECLARE
+    V_NUM NUMBER := 0;
+BEGIN
+    LOOP
+        DBMS_OUTPUT.PUT_LINE('현재 V_NUM : ' || V_NUM);
+        V_NUM := V_NUM + 1;
+        EXIT WHEN V_NUM > 4;
+    END LOOP;
+END;
+/
+
+DECLARE
+    V_NUM NUMBER := 0;
+BEGIN
+    WHILE V_NUM < 4 LOOP
+        DBMS_OUTPUT.PUT_LINE('현재 V_NUM : ' || V_NUM);
+        V_NUM := V_NUM + 1;
+    END LOOP;
+END;
+/
+
+BEGIN
+    FOR i IN 0..4 LOOP
+        DBMS_OUTPUT.PUT_LINE('현재 i : ' || i);
+    END LOOP;
+END;
+/
+
+BEGIN
+    FOR i IN REVERSE 0..4 LOOP
+        DBMS_OUTPUT.PUT_LINE('현재 i : ' || i);
+    END LOOP;
+END;
+/
+
+BEGIN
+    FOR i IN 0..4 LOOP
+        CONTINUE WHEN MOD(i, 2) = 1;
+        DBMS_OUTPUT.PUT_LINE('현재 i : ' || i);
+    END LOOP;
+END;
+/
+
+

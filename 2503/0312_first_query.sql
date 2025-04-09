@@ -26,3 +26,18 @@ GRANT SELECT ON SCOTT.EMP TO PUBLIC;
 
 show user;
 
+
+SET SERVEROUTPUT ON;
+DECLARE
+   v_sal emp.sal%TYPE;
+
+BEGIN
+  SELECT sal
+    INTO v_sal
+    FROM emp
+    WHERE EMPNO = 7369;
+      :salary := v_sal;
+
+END;
+/
+PRINT salary;

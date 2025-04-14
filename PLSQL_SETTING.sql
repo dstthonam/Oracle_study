@@ -1,0 +1,558 @@
+
+-- PL/SQL 결과를 화면에 표시
+SET SERVEROUTPUT ON; 
+DECLARE     -- 선언부
+    V_PARAM1 CONSTANT NUMBER(5) := 1;  -- 상수 선언
+    V_PARAM2 NUMBER(5) NOT NULL DEFAULT 10; 
+    V_PARAM3 DEPT.DEPTNO%TYPE := 50;
+    
+    -- ROW의 열 타입 전체를 설정
+    V_PARAM4 DEPT.DEPTNO%ROWTYPE;
+
+BEGIN       -- 실행부
+    IF {조건식1} THEN
+        DBMS_OUTPUT.PUT_LINE(V_PARAM1);
+    ELSIF {조건식2} THEN
+        DBMS_OUTPUT.PUT_LINE(V_PARAM2);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE(V_PARAM3);
+    END IF;
+
+    -- CASE문
+    CASE V_PARAM3
+        WHEN 1 THEN
+            DBMS_OUTPUT.PUT_LINE(V_PARAM1);
+        WHEN 10 THEN
+            DBMS_OUTPUT.PUT_LINE(V_PARAM2);
+        ELSE
+            DBMS_OUTPUT.PUT_LINE(V_PARAM3);
+    END CASE;
+
+    CASE 
+        WHEN V_PARAM3 = 1 THEN
+            DBMS_OUTPUT.PUT_LINE(V_PARAM1);
+        WHEN V_PARAM3 >= 10 THEN
+            DBMS_OUTPUT.PUT_LINE(V_PARAM2);
+        ELSE
+            DBMS_OUTPUT.PUT_LINE(V_PARAM3);
+    END CASE;
+
+    -- LOOP문
+    LOOP
+        EXIT WHEN V_PARAM1 > 5;
+        CONTINUE;
+        CONTINUE WHEN V_PARMA1 < 10;
+    END LOOP;
+
+    -- WHILE LOOP문
+    WHILE V_PARAM1 < 4 LOOP
+        DBMS_OUTPUT.PUT_LINE(V_PARAM3);
+        V_PARAM1 := V_PARAM1 + 1;
+    END LOOP;
+
+    FOR i IN (REVERSE) 1..10 LOOP
+        DBMS_OUTPUT.PUT_LINE('I의 값 : ' || i);
+    END LOOP;
+
+EXCEPTION   -- 예외처리부
+END;
+/   -- 명령프롬프트에서 실행할 때 '/' 필수
+
+
+
+
+
+
+
+
+-- RECODE 생성
+DECLARE
+    TYPE REC_DEPT IS RECODE(
+        DEPTNO NUMBER(2) := 99,
+        DNAME DEPT.DNAME%TYPE,
+        LOC DEPT.LOC%TYPE
+    );
+
+    DEPT_TEST REC_DEPT;
+
+BEGIN
+    -- INSERT문
+    -- UPDATE문
+END;
+/
+
+
+-- 연관 배열(COLLECTION) 사용
+DECLARE
+    TYPE ITAB_EX /* 연관배열 이름 */ IS TABLE OF VARCHAR2(20) /* 자료형 */
+    INDEX BY PLS_INTEGER; /* 인덱스형 */
+    
+    TEXT_ARR ITAB_EX;
+
+BEGIN
+    TEXT_ARR(1) := '1ST DATA';
+    TEXT_ARR(2) := '2ST DATA';
+    TEXT_ARR(3) := '3ST DATA';
+    TEXT_ARR(4) := '1ST DATA';
+
+    DBMS_OUTPUT.PUT_LINE('TEXT_ARR(1) : ' || TEXT_ARR(1));
+    DBMS_OUTPUT.PUT_LINE('TEXT_ARR(2) : ' || TEXT_ARR(2));
+    DBMS_OUTPUT.PUT_LINE('TEXT_ARR(3) : ' || TEXT_ARR(3));
+    DBMS_OUTPUT.PUT_LINE('TEXT_ARR(4) : ' || TEXT_ARR(4));
+END;
+/
+
+
+-- 연관 배열 자료형 레코드 사용
+DECLARE
+    TYPE REC_DEPT IS RECORD (
+        DEPTNO DEPT.DEPTNO%TYPE,
+        DNAME DEPT.DNAME%TYPE
+    );
+
+    TYPE ITAB_DEPT IS TABLE OF REC_DEPT
+    INDEX BY PLS_INTEGER;
+
+    DEPT_ARR ITAB_DEPT;
+    IDX PLS_INTEGER := 0;
+
+BEGIN
+    FOR i IN (SELECT DEPTNO, DNAME FROM DEPT) LOOP
+        IDX := IDX + 1;
+        DEPT_ARR(IDX).DEPTNO := i.DEPTNO;
+        DEPT_ARR(IDX).DNAME := i.DNAME;
+
+        DBMS_OUTPUT.PUT_LINE(
+            DEPT_ARR(IDX).DEPTNO || ' : ' || DEPT_ARR(IDX).DNAME);
+    END LOOP;
+END;
+/
+
+
+-- 컬랙션 메서드 사용하기(추가로 찾아보기)
+DECLARE
+    TYPE ITAB_EX IS TABLE OF VARCHAR2(20)
+INDEX BY PLS_INTEGER;
+
+    TEXT_ARR ITAB_EX;
+
+BEGIN
+    TEXT_ARR(1) := '1st data';
+    TEXT_ARR(2) := '2nd data';
+    TEXT_ARR(3) := '3rd data';
+    TEXT_ARR(50) := '50th data';
+
+    DBMS_OUTPUT.PUT_LINE('text_arr.COUNT : ' || text_arr.COUNT);
+    DBMS_OUTPUT.PUT_LINE('text_arr.FIRST : ' || text_arr.FIRST);
+    DBMS_OUTPUT.PUT_LINE('text_arr.LAST : ' || text_arr.LAST);
+    DBMS_OUTPUT.PUT_LINE('text_arr.PRIOR(50) : ' || text_arr.PRIOR(50));
+    DBMS_OUTPUT.PUT_LINE('text_arr.NEXT(50) : ' || text_arr.NEXT(50));
+
+END;
+/
+
+
+
+
+
+
+
+-- SINGLE ROW DATA를 CURSOR에 저장
+DECLARE
+    V_DEPT_ROW DEPT%ROWTYPE;
+    
+    CURSOR C1 IS
+        SELECT DEPTNO, DNAME, LOC
+            FROM DEPT
+            WHERE DEPTNO = 40;
+
+BEGIN
+    OPEN C1;
+    FETCH C1 INTO V_DEPT_ROW;
+
+    DBMS_OUTPUT.PUT_LINE('DEPTNO : ' || V_DEPT_ROW.DEPTNO);
+    DBMS_OUTPUT.PUT_LINE('DNAME : ' || V_DEPT_ROW.DNAME);
+    DBMS_OUTPUT.PUT_LINE('LOC : ' || V_DEPT_ROW.LOC);
+
+    CLOSE C1;
+END;
+/
+
+
+-- 여러 ROWS DATA를 CURSOR에 저장 후 -> LOOP문 사용
+DECLARE
+    V_DEPT_ROW DEPT%ROWTYPE;
+
+    CURSOR C1 IS
+        SELECT DEPTNO, DNAME, LOC
+            FROM DEPT;
+BEGIN
+    OPEN C1;
+
+    LOOP
+        FETCH C1 INTO V_DEPT_ROW;
+        EXIT WHEN C1%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE(
+            'DEPTNO : ' || V_DEPT_ROW.DEPTNO ||
+            ', DNAME : ' || V_DEPT_ROW.DNAME ||
+            ', LOC : ' || V_DEPT_ROW.LOC
+            );
+    END LOOP;
+
+    CLOSE C1;
+END;
+/
+
+
+-- FOR LOOP문으로 CURSOR 활용
+DECLARE
+    CURSOR C1 IS
+        SELECT DEPTNO, DNAME, LOC
+            FROM DEPT;
+
+BEGIN
+    FOR C1_REC IN C1 LOOP
+        DBMS_OUTPUT.PUT_LINE(
+            'DEPTNO : ' || C1_REC.DEPTNO ||
+            ', DNAME : ' || C1_REC.DNAME ||
+            ', LOC : ' || C1_REC.LOC
+        );
+    END LOOP;
+END;
+/
+
+
+
+-- PARAMETER를 사용하는 CURSOR
+DECLARE
+    V_DEPT_ROW DEPT%ROWTYPE;
+
+    CURSOR C1(P_DEPTNO DEPT.DEPTNO%TYPE) IS
+        SELECT DEPTNO, DNAME, LOC
+            FROM DEPT
+            WHERE DEPTNO = P_DEPTNO;
+BEGIN
+    OPEN C1(10);
+        LOOP
+            FETCH C1 INTO V_DEPT_ROW;
+            EXIT WHEN C1%NOTFOUND;
+            DBMS_OUTPUT.PUT_LINE(
+                '10번 부서 - DEPTNO : ' || V_DEPT_ROW.DEPTNO ||
+                ', DNAME : ' || V_DEPT_ROW.DNAME ||
+                ', LOC : ' || V_DEPT_ROW.LOC
+            );
+        END LOOP;
+    CLOSE C1;
+
+    OPEN C1(20);
+        LOOP
+            FETCH C1 INTO V_DEPT_ROW;
+            EXIT WHEN C1%NOTFOUND;
+            DBMS_OUTPUT.PUT_LINE(
+                '20번 부서 - DEPTNO : ' || V_DEPT_ROW.DEPTNO ||
+                ', DNAME : ' || V_DEPT_ROW.DNAME ||
+                ', LOC : ' || V_DEPT_ROW.LOC
+            );
+        END LOOP;
+    CLOSE C1;
+
+END;
+/
+
+
+-- CURSOR에 사용할 PARAMETER '&~'로 받기
+DECLARE 
+    V_DEPTNO DEPT.DEPTNO%TYPE;
+
+    CURSOR C1(P_DEPTNO DEPT.DEPTNO%TYPE) IS
+        SELECT DEPTNO, DNAME, LOC
+            FROM DEPT
+            WHERE DEPTNO = P_DEPTNO;
+
+BEGIN
+    V_DEPTNO := &INPUT_DEPTNO;
+
+    FOR C1_REC IN C1(V_DEPTNO) LOOP
+        DBMS_OUTPUT.PUT_LINE(
+            'DEPTNO : ' || C1_REC.DEPTNO ||
+            ', DNAME : ' || C1_REC.DNAME ||
+            ', LOC : ' || C1_REC.LOC
+        );
+    END LOOP;
+END;
+/
+
+
+-- 묵시적 CURSOR의 속성 사용하기(더 찾아보기)
+BEGIN
+    UPDATE DEPT SET DNAME = 'DATABASE' WHERE DEPTNO = 50;
+
+    DBMS_OUTPUT.PUT_LINE('갱신된 행의 수 : ' || SQL%ROWCOUNT);
+    DBMS_OUTPUT.PUT_LINE('갱신된 행의 수 : ' || SQL%NOTFOUND);
+    DBMS_OUTPUT.PUT_LINE('갱신된 행의 수 : ' || SQL%FOUND);
+    DBMS_OUTPUT.PUT_LINE('갱신된 행의 수 : ' || SQL%ISOPEN);
+END;
+/
+
+
+-- FOR UPDATE와 WHERE CURRENT OF 사용하여 현재 CURSOR에 사용된 로우 업데이트
+DECLARE
+    CURSOR EMP_CUR IS
+        SELECT EMPNO, SAL FROM EMP WHERE DEPTNO = 10 FOR UPDATE;
+
+BEGIN
+    FOR EMP_REC IN EMP_CUR LOOP
+    UPDATE EMP
+        SET SAL = SAL * 1.1 WHERE CURRENT OF EMP_CUR;
+    END LOOP;
+--    COMMIT;
+END;
+/
+
+
+-- REFCURSOR 사용
+CREATE OR REPLACE PROCEDURE REFCURSOR_TS (
+    P_EMPNO     IN  VARCHAR2,
+    P_ENAME     IN  VARCHAR2,
+    O_CURSOR    OUT SYS_REFCURSOR
+)
+IS
+
+BEGIN
+    OPEN O_CURSOR FOR
+        SELECT E.EMPNO, E.ENAME, E.SAL
+            FROM EMP E
+            WHERE E.EMPNO := P_EMPNO;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('SQLERROR : ' || SQLERRM);
+
+END;
+/
+
+
+
+
+-- ERROR CODE, ERROR MESSAGE 사용하기(예외처리)
+DECLARE
+    V_WRONG NUMBER;
+BEGIN
+    SELECT DNAME
+        INTO V_WRONG
+        FROM DEPT
+        WHERE DEPTNO IN 10;
+
+    DBMS_OUTPUT.PUT_LINE('예외가 발생하면 다음 문장은 실행되지 않습니다');
+
+    EXCEPTION
+        WHEN TOO_MANY_ROWS THEN
+            DBMS_OUTPUT.PUT_LINE('예외 처리 : 요구보다 많은 행 추출 오류 발생');
+        WHEN VALUE_ERROR THEN
+            DBMS_OUTPUT.PUT_LINE('예외 처리 : 수치 또는 값 오류 발생');
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('예외 처리 : 사전 정의 외 오류 발생');
+            DBMS_OUTPUT.PUT_LINE('SQLCODE : ' || TO_CHAR(SQLCODE));
+            DBMS_OUTPUT.PUT_LINE('SQLERRM : ' || SQLERRM);
+END;
+/
+
+
+
+
+
+
+
+-- PARAMETER를 사용하지 않는 PROCEDURE 생성
+CREATE OR REPLACE PROCEDURE PRO_NOPARAM 
+IS
+    V_EMPNO NUMBER(4) := 7788;
+    V_ENAME VARCHAR2(10);
+
+BEGIN 
+    V_ENAME := 'SCOTT';
+    DBMS_OUTPUT.PUT_LINE('V_EMPNO : ' || V_EMPNO);
+    DBMS_OUTPUT.PUT_LINE('V_ENAME : ' || V_ENAME);
+END;
+/
+
+
+-- PROCEDURE에 PARAMETER 지정하기
+SET SERVEROUTPUT ON SIZE UNLIMITED;  
+CREATE OR REPLACE PROCEDURE PRO_PARAM1_IN (
+    PARAM1 IN NUMBER,
+    PARAM2 NUMBER := 3,
+    PARAM3 NUMBER,
+    PARAM4 NUMBER DEFAULT 4
+)
+IS
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('PARAM1 : ' || PARAM1);
+    DBMS_OUTPUT.PUT_LINE('PARAM2 : ' || PARAM2);
+    DBMS_OUTPUT.PUT_LINE('PARAM3 : ' || PARAM3);
+    DBMS_OUTPUT.PUT_LINE('PARAM4 : ' || PARAM4);
+END;
+/
+-- PROCEDURE PARAMETER 받고 실행
+EXECUTE PRO_PARAM1_IN(PARAM1 => 10, PARAM3 => 30);
+
+EXECUTE PRO_PARAM1_IN(10, 30, PARAM3 => 100);
+
+
+-- IN/OUT/IN OUT MODE PARAMETER 사용하기
+CREATE OR REPLACE PROCEDURE PRO_PARAM_OUT (
+    IN_EMPNO IN EMP.EMPNO%TYPE,
+    OUT_ENAME OUT EMP.ENAME%TYPE,
+    OUT_SAL OUT EMP.SAL%TYPE,
+
+    INOUT_NO IN OUT NUMBER
+)
+IS
+
+BEGIN
+    SELECT E.ENAME, E.SAL
+        INTO OUT_ENAME, OUT_SAL
+        FROM EMP E
+        WHERE E.EMPNO = IN_EMPNO;
+
+END PRO_PARAM_OUT;
+/
+
+DECLARE
+    V_ENAME EMP.ENAME%TYPE;
+    V_SAL EMP.SAL%TYPE;
+
+    NO NUMBER;
+
+BEGIN
+    SCOTT.PRO_PARAM_OUT(7839, V_ENAME, V_SAL);
+    DBMS_OUTPUT.PUT_LINE('ENAME : ' || V_ENAME);
+    DBMS_OUTPUT.PUT_LINE('SAL : ' || V_SAL);
+
+    NO := 5;
+    PRO_PARAM_INOUT(NO);
+    DBMS_OUTPUT.PUT_LINE('NO : ' || NO);
+END;
+/
+
+
+
+
+
+
+
+
+-- FUNCTION 활용 -> PL/SQL, SQL, TABLE내의 SELECT문
+CREATE OR REPLACE FUNCTION FUNC_AFTERTAX (
+    SAL IN /* 입출력 MOD */ NUMBER /* 변수타입 */
+)
+RETURN NUMBER /* RETURN할 때 변수타입 */
+
+IS
+    TAX NUMBER := 0.05;
+
+BEGIN
+    RETURN (ROUND(SAL - (SAL * TAX)));
+END FUNC_AFTERTAX;
+/
+
+
+-- 패키지 SPECIFICATION(명세)
+-- PACKAGE OVERLOAD 작성
+CREATE OR REPLACE PACKAGE PKG_OVERLOAD
+IS
+    PROCEDURE PRO_EMP(IN_EMPNO IN EMP.EMPNO%TYPE);
+    PROCEDURE PRO_EMP(IN_ENAME IN EMP.ENAME%TYPE);
+END;
+/
+-- PACKAGE 본문 작성
+CREATE OR REPLACE PACKAGE BODY PKG_OVERLOAD
+IS
+    PROCEDURE PRO_EMP(IN_EMPNO IN EMP.EMPNO%TYPE)
+        IS
+            OUT_ENAME EMP.ENAME%TYPE;
+            OUT_SAL EMP.SAL%TYPE;
+        
+        BEGIN
+            SELECT ENAME, SAL
+            INTO OUT_ENAME, OUT_SAL
+            FROM EMP
+            WHERE EMPNO = IN_EMPNO;
+
+            DBMS_OUTPUT.PUT_LINE('ENAME : ' || OUT_ENAME);
+            DBMS_OUTPUT.PUT_LINE('SAL : ' || OUT_SAL);
+    END PRO_EMP;
+
+    PROCEDURE PRO_EMP(IN_ENAME IN EMP.ENAME%TYPE)
+        IS 
+            OUT_ENAME EMP.ENAME%TYPE;
+            OUT_SAL EMP.SAL%TYPE;
+        
+        BEGIN
+            SELECT ENAME, SAL
+            INTO OUT_ENAME, OUT_SAL
+            FROM EMP
+            WHERE ENAME = IN_ENAME;
+
+            DBMS_OUTPUT.PUT_LINE('ENAME : ' || OUT_ENAME);
+            DBMS_OUTPUT.PUT_LINE('SAL : ' || OUT_SAL);
+        END PRO_EMP;
+END;
+/
+
+
+
+
+
+
+-- DML TRIGGER (BEFORE) 제작 및 사용
+CREATE OR REPLACE TRIGGER TRG_EMP_NODML_WEEKEND
+BEFORE
+INSERT OR UPDATE OR DELETE ON EMP_TRG
+
+BEGIN
+    IF TO_CHAR(SYSDATE, 'DY', 'NLS_DATE_LANGUAGE=KOREAN') IN ('토', '일') THEN
+        IF INSERTING THEN
+            RAISE_APPLICATION_ERROR(-20000, '주말 사원정보 추가 불가');
+        ELSIF UPDATING THEN
+            RAISE_APPLICATION_ERROR(-20001, '주말 사원정보 수정 불가');
+        ELSIF DELETING THEN
+            RAISE_APPLICATION_ERROR(-20002, '주말 사원정보 삭제 불가');
+        ELSE 
+            RAISE_APPLICATION_ERROR(-20003, '주말 사원정보 변경 불가');
+        END IF;
+    END IF;
+END;
+/
+
+
+-- DML TRIGGER (AFTER) 제작 및 사용
+CREATE OR REPLACE TRIGGER TRG_EMP_LOG
+AFTER
+INSERT OR UPDATE OR DELETE ON EMP_TRG
+FOR EACH ROW --{WEHN 조건식}
+--FOLLOWS TRIGGER2, TRIGGER3
+--(ENABLE/DISABLE)
+
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO EMP_TRG_LOG
+        VALUES ('EMP_TRG', 'INSERT', :NEW.EMPNO, SYS_CONTEXT('USERNEW', 'SESSION_USER'), SYSDATE);
+
+    ELSIF UPDATING THEN
+        INSERT INTO EMP_TRG_LOG
+        VALUES ('EMP_TRG', 'UPDATE', :OLD.EMPNO, SYS_CONTEXT('USERNEW', 'SESSION_USER'), SYSDATE);
+
+    ELSIF DELETING THEN
+        INSERT INTO EMP_TRG_LOG
+        VALUES ('EMP_TRG', 'DELETE', :OLD.EMPNO, SYS_CONTEXT('USERNEW', 'SESSION_USER'), SYSDATE);
+        
+    END IF;
+END;
+/
+
+
+-- TRIGGER 상태 비활성화
+ALTER TRIGGER TRG_EMP_NODML_WEEKEND DISABLE;

@@ -1,3 +1,5 @@
+
+-- 홀수 판단
 DECLARE
     V_NUMBER NUMBER := 13;
 BEGIN
@@ -7,8 +9,11 @@ BEGIN
 END;
 /
 
+
+-- 홀/짝수 판단
 DECLARE
     V_NUMBER NUMBER := 14;
+
 BEGIN
     IF MOD(V_NUMBER, 2) = 1 THEN
         DBMS_OUTPUT.PUT_LINE('V_NUMBER는 홀수입니다!');
@@ -18,8 +23,11 @@ BEGIN
 END;
 /
 
+
+-- 점수에 따른 학점 출력
 DECLARE
     V_SCORE NUMBER := 87;
+
 BEGIN
     CASE TRUNC(V_SCORE/10)
         WHEN 10 THEN DBMS_OUTPUT.PUT_LINE('A학점');
@@ -32,8 +40,11 @@ BEGIN
 END;
 /
 
+
+-- 기본 LOOP문 사용
 DECLARE
     V_NUM NUMBER := 0;
+
 BEGIN
     LOOP
         DBMS_OUTPUT.PUT_LINE('현재 V_NUM : ' || V_NUM);
@@ -43,8 +54,11 @@ BEGIN
 END;
 /
 
+
+-- WHILE LOOP문 사용
 DECLARE
     V_NUM NUMBER := 0;
+
 BEGIN
     WHILE V_NUM < 4 LOOP
         DBMS_OUTPUT.PUT_LINE('현재 V_NUM : ' || V_NUM);
@@ -53,6 +67,8 @@ BEGIN
 END;
 /
 
+
+-- FOR LOOP문 사용
 BEGIN
     FOR i IN 0..4 LOOP
         DBMS_OUTPUT.PUT_LINE('현재 i : ' || i);
@@ -60,6 +76,8 @@ BEGIN
 END;
 /
 
+
+-- FOR ~ REVERSE ~ LOOP문 사용
 BEGIN
     FOR i IN REVERSE 0..4 LOOP
         DBMS_OUTPUT.PUT_LINE('현재 i : ' || i);
@@ -67,6 +85,8 @@ BEGIN
 END;
 /
 
+
+-- FOR LOOP 안에 CONTINUE WHEN문 사용
 BEGIN
     FOR i IN 0..4 LOOP
         CONTINUE WHEN MOD(i, 2) = 1;

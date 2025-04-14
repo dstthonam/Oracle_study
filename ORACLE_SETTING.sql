@@ -4,6 +4,14 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 -- SQL*PLUS에서 SCHEMA 생성시 
 @$ORCLE_HOME/DEMO/SCHEMA/{생성할 SCHEMA.sql}
 
+
+
+
+
+
+
+
+
 /**
 
 SQL*PLUS COMMAND
@@ -18,6 +26,40 @@ EXIT/QUIT;
 SELECT * FROM V$SESSION WHERE SCHEMANAME = 'SCOTT';
 -- SESSION KILLED
 ALTER SYSTEM KILL SESSION {'SID,SERIAL#'}; -- SID와 SERIAL# 컬럼의 값을 입력, ''도 입력해야함.
+
+
+
+/**
+
+SYS_CONTEXT
+- USERENV : 현재 세션의 환경 정보를 반환하는 NAMESPACE
+
+*/
+
+SELECT SYS_CONTEXT('USERENV','ISDBA') as dba권한사용자여부
+     , SYS_CONTEXT('USERENV','IP_ADDRESS') as 연결된ip주소
+     , SYS_CONTEXT('USERENV','SESSIONID') as 세션id
+     , SYS_CONTEXT('USERENV','OS_USER') as os_user
+     , SYS_CONTEXT('USERENV','SID') as sid 
+     , SYS_CONTEXT('USERENV','DB_NAME') as dbname 
+     , SYS_CONTEXT('USERENV','Bg_job_id') as db_job_id
+     , SYS_CONTEXT('USERENV','current_sql') as current_sql
+     , SYS_CONTEXT('USERENV','LANGUAGE') as 설정언어
+     , SYS_CONTEXT('USERENV','TERMINAL') as 운영체제시스템
+     , SYS_CONTEXT('USERENV','session_user') as 세션user   
+     , SYS_CONTEXT('USERENV','MODULE')   as prg
+  FROM dual;
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**
@@ -38,6 +80,9 @@ SELECT * FROM V$INSTANCE;
 -- 
 SELECT * FROM DBA_ROLE_PRIVS;
 
+-- USER가 생성한 모든 OBJECTS 참조
+SELECT * FROM USER_OBJECTS;
+
 -- NLS_INSTANCE_PARAMETERS init.ora/spfile 설정
 SELECT * FROM NLS_INSTANCE_PARAMETERS;
 -- NLS_DATABASE_PARAMETERS init.ora/spfile 설정
@@ -46,7 +91,20 @@ SELECT * FROM SYS.PROPS$;
 -- 
 SELECT * FROM DATABASE_PROPERTIES;
 
---
+--???
+SELECT * FROM USER_DEPENDENCIES;
+
+--???
+@X:\oracle\product\ver\19c\dbhome\WINDOWS.X64_193000_db_home\rdbms\admin\utldtree.sql
+EXECUTE deptree_fill('TABLE', 'SCOTT', 'DEPT');
+SELECT * FROM {DEPTREE/IDEPTREE VIEW};
+
+
+
+
+
+
+
 
 /**
 
@@ -113,8 +171,7 @@ READ, WRITE ON DIRECTORY {DIRECTORY_NAME}                     - DIRECTORY 읽기
 ~~{TO/FROM} PUBLIC                                            - 모든 사용자에게 권한 부여
 */
 GRANT {GRANT TO ORDER} TO {USERNAME};
--- USER 권한 회수
-REVOKE {GRANT TO ORDER} FROM {USERNAME};
+REVOKE {GRANT TO ORDER} FROM {USERNAME}; -- USER 권한 회수
 
 
 
@@ -131,6 +188,9 @@ CREATE TABLESPACE {ORA_DEV_TEST} DATAFILE {'X:\oracle\product\oradata\ORCL\ORA_D
 
 -- TABLESPACE 제한용량 및 권한
 ALTER USER {USERNAME} QUOTA {100M(제한용량)} ON {TABLESPACE_NAME};
+
+
+
 
 
 
@@ -165,6 +225,9 @@ ORGANIZATION EXTERNAL
   LOCATION ('employees.csv')
 ); 
 
+
+
+
 /**
 
 SYNONYM 설정 관련
@@ -172,6 +235,10 @@ SYNONYM 설정 관련
 */
 CREATE (OR REPLACE) (PUBLIC/PRIVATE) SYNONYM {(USERNAME).SYNONYM_NAME} FOR {USERNAME.OBJ_NAME};
 DROP (PUBLIC) SYNONYM {OBJ_NAME};
+
+
+
+
 
 
 
@@ -193,6 +260,68 @@ ALTER TABLE {TABLE_NAME} (ENABLE/DISABLE) CONSTRAINT {CONSTRAINT_NAME};
 
 
 
+
+/**
+
+PACKAGE 설정 관련
+
+*/
+
+
+
+
+
+
+
+
+
+/**
+
+TRIGGER 설정 관련
+
+
+
+*/
+-- TRIGGER 정보 조회회
+SELECT TRIGGER_NAME, TRIGGER_TYPE, TRIGGERING_EVENT, TABLE_NAME, STATUS
+    FROM USER_TRIGGERS;
+-- 해당 TABLE의 TRIGGER 비/활성화
+ALTER TABLE {TABLE_NAME} (ENABLE/DISABLE) ALL TRIGGERS;
+ALTER TRIGGER {TRIGGER_NAME} (ENABLE/DISABLE);
+-- TRIGGER 삭제
+DROP TRIGGER {TRIGGER_NAME};
+
+
+
+
+
+/**
+
+ORACLE 기본 제공 PACKAGE 관련
+
+DBMS_OUTPUT : PL/SQL 블록 내의 변수 데이터를 화면에 출력
+DBMS_SQL : PL/SQL에서 동적 SQL을 구현할 때 사용
+DBMS_JOB : 특정 PL/SQL 블록을 스케쥴링 하여 실행할 때 사용
+DBMS_DDL : DDL 문을 실행할 때 사용
+DBMS_PIPE : DB에 접속된 다른 사용자에게 메시지를 전송할 때 사용
+DBMS_AQ : DBMS_PIPE의 향상된 기능으로 DB에 접속된 다른 사용자에게 메시지를 전송할 때 사용
+DBMS_SESSION : DB에 접속된 다른 사용자의 정보를 참조할 때 사용
+UTL_FILE : O/S상의 텍스트 파일을 PL/SQL 내에서 읽을 때 사용
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
 
 DATA DUMP 
@@ -210,6 +339,11 @@ impdp [USERNAME]/[USERPASSWORD] dumpfile={파일이름.dmp} table_exists_action=
 
 
 
+
+
+
+
+
 /**
 
 PDBS 설정 관련
@@ -221,6 +355,11 @@ SELECT NAME, OPEN_MODE, RESTRICTED FROM V$PDBS;
 
 
 ALTER PLUGGABLE DATABASE PDB1 {OPEN/CLOSE};
+
+
+
+
+
 
 
 
@@ -301,6 +440,18 @@ MERGE INTO EMP_TEMP T
         WHERE E.DEPTNO = 20
         ;
 
+CREATE USER USER_NAME IDENTIFIED BY PASSWORD DEFAULT TABLESPACE TABLESPACE_NAME
+TEMPORARY TABLESPACE TABLESPACE_NAME QUOTA TABLESPACE_SIZE ON TABLESPACE_NAME
+PROFILE PROFILE_NAME PASSWORD EXPIRE ACCOUNT (LOCK/UNLOCK);
 
+SELECT * FROM ALL_USERS;
+SELECT * FROM DBA_USERS;
+
+SELECT * FROM DBA_OBJECTS WHERE OWNER = 'SCOTT';
+
+select * from user_mviews;
+select * from v$controlfile;
+select * from v$parameter --where name='control_files'
+;
 
         

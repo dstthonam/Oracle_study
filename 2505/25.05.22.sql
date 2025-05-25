@@ -1,1 +1,49 @@
 SET SERVEROUTPUT ON SIZE UNLIMITED;  
+
+-- 전화번호 처음 3자리를 '(02)'로 변경
+SELECT LPAD(SUBSTR(E.PHONE_NUMBER, 5), 12, '(02)') FROM EMPLOYEES E;
+
+-- 근속년수 10년 이상인 직원 조회
+SELECT E.EMPLOYEE_ID, E.EMP_NAME, E.HIRE_DATE
+        , TRUNC(MONTHS_BETWEEN(SYSDATE, E.HIRE_DATE)/12) AS HIRE_OF_YEARS
+    FROM EMPLOYEES E
+    WHERE MONTHS_BETWEEN(SYSDATE, E.HIRE_DATE) >= 120
+    ORDER BY E.HIRE_DATE ASC;
+
+-- CUST_MAIN_PHONE_NUMBER 컬럼 '-' => '/'으로 변경경
+SELECT REPLACE(C.CUST_MAIN_PHONE_NUMBER, '-', '/') FROM CUSTOMERS C;
+
+-- 고객 전화번호 컬럼을 다른 문자로 대체(일종의 암호화)
+SELECT TRANSLATE(C.CUST_MAIN_PHONE_NUMBER, '1234567890', '**********')
+    FROM CUSTOMERS C;
+
+-- DECODE를 사용하여 연령대 표시시
+SELECT DECODE(TRUNC((TO_CHAR(SYSDATE, 'YYYY') - C.CUST_YEAR_OF_BIRTH)/10),
+                    '3', '30대',
+                    '4', '40대',
+                    '5', '50대',
+                    '기타')
+    FROM CUSTOMERS C
+    ; 
+
+-- SWITCH로 연령대 표시
+SELECT CASE TRUNC((TO_CHAR(SYSDATE, 'YYYY') - C.CUST_YEAR_OF_BIRTH)/10) 
+            WHEN 1 THEN '10대'
+            WHEN 2 THEN '20대'
+            WHEN 3 THEN '30대'    
+            WHEN 4 THEN '40대'
+            WHEN 5 THEN '50대'
+            ELSE '기타'
+        END AS SWITCH_CASE
+    FROM CUSTOMERS C
+    ;
+
+
+
+
+
+
+SELECT TRUNC((TO_CHAR(SYSDATE, 'YYYY') - C.CUST_YEAR_OF_BIRTH)/10) 
+    FROM CUSTOMERS C;
+
+SELECT TO_CHAR(SYSDATE, 'YYYY') FROM DUAL;
